@@ -1,0 +1,329 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Firewall API",
+    "version": "1.0.0",
+    "description": "API documentation for managing firewall rules (IP, URL, Port)"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/api/firewall/{type}": {
+      "post": {
+        "summary": "Add firewall rules",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["ip", "url", "port"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["whitelist", "blacklist"]
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["mode", "values"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rules inserted successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete firewall rules by values",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["ip", "url", "port"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["whitelist", "blacklist"]
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["mode", "values"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rules deleted successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/api/firewall/rules": {
+      "get": {
+        "summary": "Fetch all firewall rules (structured)",
+        "responses": {
+          "200": {
+            "description": "List of all rules"
+          }
+        }
+      },
+      "put": {
+        "summary": "Toggle activation of firewall rules",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ips": {
+                    "type": "object",
+                    "properties": {
+                      "ids": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                      },
+                      "active": { "type": "boolean" }
+                    }
+                  },
+                  "urls": {
+                    "type": "object",
+                    "properties": {
+                      "ids": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                      },
+                      "active": { "type": "boolean" }
+                    }
+                  },
+                  "ports": {
+                    "type": "object",
+                    "properties": {
+                      "ids": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                      },
+                      "active": { "type": "boolean" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rules toggled successfully"
+          }
+        }
+      }
+    },
+    "/api/firewall/many/rules": {
+      "delete": {
+        "summary": "Delete multiple rules by IDs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": { "type": "integer" }
+                  }
+                },
+                "required": ["ids"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rules deleted successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/api/firewall/rules/{id}": {
+      "get": {
+        "summary": "Get single firewall rule by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Rule found" },
+          "404": { "description": "Rule not found" },
+          "400": { "description": "Invalid id" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "User created" }, "409": { "description": "Email already in use" }, "400": { "description": "Validation error" } }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login and obtain JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "JWT token returned" }, "401": { "description": "Invalid credentials" }, "400": { "description": "Validation error" } }
+      }
+    },
+    "/access/me": {
+      "get": {
+        "summary": "Get current user from JWT",
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Current user payload" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "List users",
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Users list" }, "401": { "description": "Unauthorized" } }
+      },
+      "post": {
+        "summary": "Create user",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" },
+                  "role": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "User created" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Get user by id",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "responses": { "200": { "description": "User" }, "404": { "description": "Not found" }, "401": { "description": "Unauthorized" } }
+      },
+      "put": {
+        "summary": "Update user",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" },
+                  "role": { "type": "string" },
+                  "is_active": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated" }, "404": { "description": "Not found" }, "401": { "description": "Unauthorized" } }
+      },
+      "delete": {
+        "summary": "Delete user",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
+        "responses": { "200": { "description": "Deleted" }, "404": { "description": "Not found" }, "401": { "description": "Unauthorized" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  }
+}
