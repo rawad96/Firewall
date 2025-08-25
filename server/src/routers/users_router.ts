@@ -1,11 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../utils/auth';
 import { createUser, deleteUser, getUserById, listUsers, updateUser } from '../controllers/users_controller';
 
 const router = Router();
 
-// Create user (admin only ideally; keeping simple here)
-router.post('/', authMiddleware, async (req: Request, res: Response) => {
+// Create user
+router.post('/', async (req: Request, res: Response) => {
   const { email, password, role } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   try {
@@ -18,7 +17,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // List users
-router.get('/', authMiddleware, async (_req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
   try {
     const users = await listUsers();
     return res.json(users);
@@ -29,7 +28,7 @@ router.get('/', authMiddleware, async (_req: Request, res: Response) => {
 });
 
 // Get by id
-router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' });
   try {
@@ -43,7 +42,7 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // Update
-router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' });
   const { email, password, role, is_active } = req.body;
@@ -58,7 +57,7 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // Delete
-router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' });
   try {
@@ -72,5 +71,3 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
 });
 
 export default router;
-
-
