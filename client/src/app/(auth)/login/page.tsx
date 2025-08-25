@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,10 +17,13 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      // TODO: integrate with server auth endpoint
-      await new Promise((r) => setTimeout(r, 600));
+      const response = await api.login({ email, password });
+      // Store token in localStorage
+      localStorage.setItem('token', response.token);
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
     } catch (err) {
-      setError("Login failed. Please try again.");
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }

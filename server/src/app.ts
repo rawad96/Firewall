@@ -8,9 +8,18 @@ import usersRouter from './routers/users_router';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
+import cors from 'cors';
 
 const app = express();
 const PORT = 5000;
+
+// CORS configuration
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 

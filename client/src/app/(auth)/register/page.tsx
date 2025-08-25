@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { api } from "@/lib/api";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -21,10 +22,11 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      // TODO: integrate with server registration endpoint
-      await new Promise((r) => setTimeout(r, 600));
+      await api.register({ email, password });
+      // Redirect to login page after successful registration
+      window.location.href = '/login';
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
