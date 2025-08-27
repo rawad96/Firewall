@@ -10,6 +10,7 @@ import {
   fetchRuleById,
 } from '../controllers/rules_controller';
 import { validCategories, validTypes, validateValuesByType } from '../utils/validation';
+import { log } from 'node:console';
 
 const router = Router();
 
@@ -54,6 +55,7 @@ router.delete('/api/firewall/:type', async (req: Request, res: Response) => {
 
   try {
     const deleted = await deleteRules(mode, type as RuleType, values);
+    if(deleted.length === 0) return res.status(404).json({ error: 'No rules found to delete' });
     res.json({ type, mode, values, status: 'success', deleted });
   } catch (err) {
     console.error(err);

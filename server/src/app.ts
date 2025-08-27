@@ -5,6 +5,7 @@ import rulesRouter from './routers/rules';
 import authRouter from './routers/auth_router';
 import accessRouter from './routers/access_router';
 import usersRouter from './routers/users_router';
+
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
@@ -48,8 +49,10 @@ app.use('/rules', rulesRouter);
 app.use('/auth', authRouter);
 app.use('/access', accessRouter);
 app.use('/users', usersRouter);
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerData));
 
-// app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
-// });
+// Raw swagger JSON for client consumption
+app.get('/swagger.json', (_req: Request, res: Response) => {
+  res.json(swaggerData);
+});

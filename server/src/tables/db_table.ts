@@ -19,12 +19,23 @@ const createTable = async () => {
       password_enc_cipher TEXT,
       password_enc_iv TEXT,
       password_enc_tag TEXT,
+      full_name VARCHAR(255),
+      phone VARCHAR(50),
       role VARCHAR(50) DEFAULT 'user',
       is_active BOOLEAN DEFAULT true,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
   `);
+
+  // Add new columns if they don't exist (for existing databases)
+  try {
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255)`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50)`);
+  } catch (error) {
+    console.log("Columns might already exist or error occurred:", error);
+  }
+
   console.log("Table created!");
 }
 

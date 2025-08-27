@@ -218,7 +218,9 @@
                 "type": "object",
                 "properties": {
                   "email": { "type": "string", "format": "email" },
-                  "password": { "type": "string", "format": "password" }
+                  "password": { "type": "string", "format": "password" },
+                  "fullName": { "type": "string", "description": "User's full name" },
+                  "phone": { "type": "string", "description": "User's phone number" }
                 },
                 "required": ["email", "password"]
               }
@@ -320,6 +322,7 @@
         "responses": { "200": { "description": "Deleted" }, "404": { "description": "Not found" }, "401": { "description": "Unauthorized" } }
       }
     }
+
   },
   "components": {
     "securitySchemes": {

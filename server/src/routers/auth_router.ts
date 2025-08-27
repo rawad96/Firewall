@@ -7,12 +7,12 @@ const router = Router();
 
 // Register
 router.post('/register', async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, fullName, phone } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   try {
     const existing = await getUserByEmailWithHash(email);
     if (existing) return res.status(409).json({ error: 'Email already in use' });
-    const user = await createUser(email, password);
+    const user = await createUser(email, password, fullName, phone);
     return res.status(201).json(user);
   } catch (err) {
     console.error(err);

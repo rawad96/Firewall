@@ -7,22 +7,54 @@ import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirm: ""
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password !== confirm) {
+    
+    // Validation
+    if (!formData.fullName.trim()) {
+      setError("Full name is required");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError("Email is required");
+      return;
+    }
+    if (!formData.phone.trim()) {
+      setError("Phone number is required");
+      return;
+    }
+    if (formData.password !== formData.confirm) {
       setError("Passwords do not match");
       return;
     }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.register({ email, password });
+      await api.register({ 
+        email: formData.email, 
+        password: formData.password,
+        fullName: formData.fullName,
+        phone: formData.phone
+      });
       // Redirect to login page after successful registration
       window.location.href = '/login';
     } catch (err) {
@@ -38,7 +70,7 @@ export default function RegisterPage() {
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            Set up your access
+            Set up your access with personal information
           </p>
         </div>
 
@@ -50,55 +82,84 @@ export default function RegisterPage() {
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
+            <label htmlFor="fullName" className="text-sm font-medium">
+              Full Name *
+            </label>
+            <Input
+              id="fullName"
+              type="text"
+              placeholder="John Doe"
+              value={formData.fullName}
+              onChange={(e) => handleInputChange("fullName", e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              Email *
             </label>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="phone" className="text-sm font-medium">
+              Phone Number *
+            </label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+1 (555) 123-4567"
+              value={formData.phone}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              Password *
             </label>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
               required
             />
+            <p className="text-xs text-neutral-500">Must be at least 6 characters</p>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="confirm" className="text-sm font-medium">
-              Confirm password
+              Confirm Password *
             </label>
             <Input
               id="confirm"
               type="password"
               placeholder="••••••••"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              value={formData.confirm}
+              onChange={(e) => handleInputChange("confirm", e.target.value)}
               required
             />
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creating..." : "Create account"}
+            {loading ? "Creating Account..." : "Create Account"}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm text-neutral-500">
           <span>Already have an account? </span>
-          <Link href="/login" className="underline underline-offset-4">
+          <Link href="/login" className="underline underline-offset-4 hover:text-neutral-700 dark:hover:text-neutral-300">
             Sign in
           </Link>
         </div>
