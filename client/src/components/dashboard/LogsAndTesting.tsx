@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Spinner from "../ui/Spinner";
-import { log } from "console";
+
 
 interface TestResult {
   id: string;
@@ -26,6 +26,7 @@ const AVAILABLE_TESTS = [
 export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
+  const [createdUserId, setCreatedUserId] = useState<number | null>(null);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
@@ -55,8 +56,6 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
     const startTime = Date.now();
     let success = false;
     let message = "";
-    let createdRuleId: number | null = null;
-    let createdUserId: number | null = null;
 
     try {
       switch (testId) {
@@ -79,8 +78,6 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
           });
           success = createRuleResponse.ok;
           if (success) {
-            const createdRule = await createRuleResponse.json();
-            createdRuleId = createdRule.id;
             message = "Test rule created successfully";
           } else {
             message = `Failed: ${createRuleResponse.statusText}`;
@@ -99,12 +96,10 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
               });
           
               if (deleteRuleResponse.ok) {
-                console.log(deleteRuleResponse);
-                
                 success = true;
                 message = "Test rule deleted successfully";
               } else if (deleteRuleResponse.status === 404) {
-                // השרת מחזיר 404 אם החוק לא קיים
+               
                 success = false;
                 message = "No test rule found to delete - run Create Test Rule first";
               } else {
@@ -138,7 +133,7 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
           success = createUserResponse.ok;
           if (success) {
             const createdUser = await createUserResponse.json();
-            createdUserId = createdUser.id;
+            setCreatedUserId(createdUser.id);
             message = "Test user created successfully";
           } else {
             message = `Failed: ${createUserResponse.statusText}`;
@@ -155,7 +150,7 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
               if (deleteUserResponse.ok) {
                 success = true;
                 message = "Test user deleted successfully";
-                createdUserId = null; 
+                setCreatedUserId(null); 
               } else if (deleteUserResponse.status === 404) {
                 success = false;
                 message = "No test user found to delete - run Create Test User first";
