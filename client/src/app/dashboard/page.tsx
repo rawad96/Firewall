@@ -6,6 +6,10 @@ import Overview from "@/components/dashboard/Overview";
 import FirewallRules from "@/components/dashboard/FirewallRules";
 import ApiInterface from "@/components/dashboard/ApiInterface";
 import LogsAndTesting from "@/components/dashboard/LogsAndTesting";
+import { env } from "@/config/env";
+
+const API_BASE = env.NEXT_PUBLIC_API_URL;
+
 
 type TabKey = "overview" | "firewall" | "api" | "logs";
 
@@ -25,7 +29,7 @@ export default function DashboardPage() {
 
     const validateToken = async () => {
       try {
-        const response = await fetch("http://localhost:5000/access/me", {
+        const response = await fetch(`${API_BASE}/access/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

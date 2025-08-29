@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { env } from "@/config/env";
+const API_BASE = env.NEXT_PUBLIC_API_URL;
 
 export interface LoginRequest {
   email: string;

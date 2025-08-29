@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Spinner from "../ui/Spinner";
+import { env } from "@/config/env";
 
 
 interface TestResult {
@@ -11,7 +12,7 @@ interface TestResult {
   timestamp: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = env.NEXT_PUBLIC_API_URL;
 
 const AVAILABLE_TESTS = [
   { id: "rules_get", name: "Get All Rules", description: "Test GET /api/firewall/rules endpoint" },
@@ -217,10 +218,11 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
     });
   };
 
-  const runAllTests = () => {
-    AVAILABLE_TESTS.forEach(test => runTest(test.id));
+  const runAllTests = async () => {
+    for (const test of AVAILABLE_TESTS) {
+      await runTest(test.id);
+    }
   };
-
   const clearTestResults = () => {
     setTestResults([]);
   };

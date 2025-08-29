@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { env } from "@/config/env";
+
+const API_BASE = env.NEXT_PUBLIC_API_URL;
 
 interface UserProfile {
   email: string;
@@ -33,7 +36,7 @@ export default function ProfilePage() {
     }
     const load = async () => {
       try {
-        const res = await fetch("http://localhost:5000/access/me", {
+        const res = await fetch(`${API_BASE}/access/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Unauthorized");

@@ -1,8 +1,8 @@
 import crypto from 'crypto';
+import {config} from '../config/env';
 
 const DEFAULT_ALGO = 'aes-256-gcm';
-const KEY_HEX = process.env.PASSWORD_ENC_KEY || crypto.randomBytes(32).toString('hex');
-const KEY = Buffer.from(KEY_HEX, 'hex');
+const KEY = Buffer.from(config.PASSWORD_ENC_KEY, 'hex');
 
 export const encrypt = (plaintext: string): { cipher: string; iv: string; tag: string } => {
   const iv = crypto.randomBytes(12);

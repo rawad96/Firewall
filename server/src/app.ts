@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
 import prisma from "./config/db";
-import createTable from "./tables/db_table";
+// import createTable from "./tables/db_table";
 import rulesRouter from './routers/rules';
 import authRouter from './routers/auth_router';
 import accessRouter from './routers/access_router';
 import usersRouter from './routers/users_router';
+import { config } from "./config/env";
 
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
@@ -12,7 +13,7 @@ import path from 'path';
 import cors from 'cors';
 
 const app = express();
-const PORT = 5000;
+
 
 // CORS configuration
 app.use(cors({
@@ -29,10 +30,10 @@ async function startServer() {
     await prisma.$connect();
     console.log("✅ Connected to PostgreSQL via Prisma");
 
-    createTable();
+    // createTable();
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
+    app.listen(config.PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${config.PORT}`);
     });
   } catch (error) {
     console.error("❌ Failed to connect to PostgreSQL", error);

@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import {config} from "../config/env";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
+
+const JWT_SECRET = config.JWT_SECRET;
 const JWT_EXPIRES_IN = '1d';
 
 export interface JwtPayload {

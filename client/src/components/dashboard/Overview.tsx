@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { env } from "@/config/env";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = env.NEXT_PUBLIC_API_URL;
 
 export default function Overview({ isAdmin }: { isAdmin: boolean }) {
   const [activeModules, setActiveModules] = useState<number>(0);
