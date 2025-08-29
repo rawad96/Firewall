@@ -44,7 +44,7 @@ export default function ProfilePage() {
           role: userData?.role || "user",
           fullName: userData?.fullName || userData?.email?.split("@")[0] || "",
           phone: userData?.phone || "",
-          createdAt: userData?.created_at || new Date().toISOString(),
+          createdAt: userData?.createdAt || new Date().toISOString(),
           lastLogin: new Date().toISOString()
         });
         setEditForm({

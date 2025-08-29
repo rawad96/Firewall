@@ -5,10 +5,10 @@ const router = Router();
 
 // Create user
 router.post('/', async (req: Request, res: Response) => {
-  const { email, password, role } = req.body;
+  const { email, password, role, full_name, phone } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   try {
-    const user = await createUser(email, password, role);
+    const user = await createUser(email, password, full_name, phone, role);
     return res.status(201).json(user);
   } catch (err) {
     console.error(err);
@@ -45,9 +45,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' });
-  const { email, password, role, is_active } = req.body;
+  const { email, password, full_name, phone, role, isActive } = req.body;
   try {
-    const user = await updateUser(id, { email, password, role, is_active });
+    const user = await updateUser(id, { email, password, fullName:full_name, phone, role, isActive });
     if (!user) return res.status(404).json({ error: 'User not found' });
     return res.json(user);
   } catch (err) {

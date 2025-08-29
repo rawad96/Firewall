@@ -1,4 +1,4 @@
-import pool from '../config/db';
+import prisma from '../config/db';
 
 export type Category = 'whitelist' | 'blacklist';
 export type RuleType = 'ip' | 'url' | 'port';
@@ -9,7 +9,7 @@ export interface Rule {
   type: RuleType;
   value: string;
   active?: boolean;
-  created_at?: string;
+  createdAt?: Date;
 }
 
 interface RuleItem {
@@ -28,61 +28,79 @@ interface RulesResponse {
 // Fetch all rules
 // --------------------
 export const fetchAllRules = async (): Promise<RulesResponse> => {
-  const result = await pool.query<Rule>('SELECT * FROM firewall_rules ORDER BY id ASC');
-  const rules = result.rows;
+  try {
+    const rules = await prisma.firewallRule.findMany({
+      orderBy: { id: 'asc' }
+    });
 
-  const response: RulesResponse = {
-    ips: { whitelist: [], blacklist: [] },
-    urls: { whitelist: [], blacklist: [] },
-    ports: { whitelist: [], blacklist: [] },
-  };
-
-  rules.forEach(rule => {
-    const item: RuleItem = {
-      id: rule.id!,
-      value: rule.value,
-      active: rule.active ?? true,
+    const response: RulesResponse = {
+      ips: { whitelist: [], blacklist: [] },
+      urls: { whitelist: [], blacklist: [] },
+      ports: { whitelist: [], blacklist: [] },
     };
-    if (rule.type === 'ip') response.ips[rule.category].push(item);
-    if (rule.type === 'url') response.urls[rule.category].push(item);
-    if (rule.type === 'port') response.ports[rule.category].push(item);
-  });
 
-  return response;
+    rules.forEach((rule: any) => {
+      const item: RuleItem = {
+        id: rule.id,
+        value: rule.value,
+        active: rule.active,
+      };
+      if (rule.type === 'ip') response.ips[rule.category as Category].push(item);
+      if (rule.type === 'url') response.urls[rule.category as Category].push(item);
+      if (rule.type === 'port') response.ports[rule.category as Category].push(item);
+    });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // --------------------
 // Fetch single rule by ID
 // --------------------
 export const fetchRuleById = async (id: number): Promise<Rule | null> => {
-  const result = await pool.query<Rule>(
-    'SELECT * FROM firewall_rules WHERE id = $1 LIMIT 1',
-    [id]
-  );
-  if (result.rows.length === 0) return null;
-  return result.rows[0];
+  try {
+    const rule = await prisma.firewallRule.findUnique({
+      where: { id }
+    });
+    return rule;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // --------------------
 // Insert (no duplicates)
 // --------------------
 export const insertRules = async (rules: Rule[]): Promise<Rule[]> => {
-  const inserted: Rule[] = [];
-  for (const rule of rules) {
-    const existing = await pool.query<Rule>(
-      'SELECT * FROM firewall_rules WHERE category=$1 AND type=$2 AND value=$3',
-      [rule.category, rule.type, rule.value]
-    );
+  try {
+    const inserted: Rule[] = [];
+    for (const rule of rules) {
+      const existing = await prisma.firewallRule.findFirst({
+        where: {
+          category: rule.category,
+          type: rule.type,
+          value: rule.value
+        }
+      });
 
-    if (existing.rowCount === 0) {
-      const res = await pool.query<Rule>(
-        'INSERT INTO firewall_rules (category, type, value, active) VALUES ($1, $2, $3, $4) RETURNING *',
-        [rule.category, rule.type, rule.value, rule.active ?? true]
-      );
-      inserted.push(res.rows[0]);
+      if (!existing) {
+        const newRule = await prisma.firewallRule.create({
+          data: {
+            category: rule.category,
+            type: rule.type,
+            value: rule.value,
+            active: rule.active ?? true
+          }
+        });
+        inserted.push(newRule);
+      }
     }
+    return inserted;
+  } catch (error) {
+    throw error;
   }
-  return inserted;
 };
 
 // --------------------
@@ -92,41 +110,59 @@ export const deleteRules = async (
   category: Category,
   type: RuleType,
   values: (string | number)[]
-): Promise<Rule[]> => {
-  const deleted: Rule[] = [];
-  for (const value of values) {
-    const res = await pool.query<Rule>(
-      'DELETE FROM firewall_rules WHERE category=$1 AND type=$2 AND value=$3 RETURNING *',
-      [category, type, value]
-    );
-    if (res.rows.length > 0) deleted.push(...res.rows);
-  }
-  return deleted;
-};
+): Promise<number> => {
+  try {
+    const result = await prisma.firewallRule.deleteMany({
+      where: {
+        category,
+        type,
+        value: { in: values.map(v => v.toString()) }
+      }
+    });
 
+    return result.count; // כמה חוקים נמחקו בפועל
+  } catch (error) {
+    throw error;
+  }
+};
 // --------------------
 // Delete by IDs
 // --------------------
 export const deleteRulesByIds = async (ids: number[]): Promise<Rule[]> => {
-  if (!ids || ids.length === 0) return [];
-  const result = await pool.query(
-    'DELETE FROM firewall_rules WHERE id = ANY($1::int[]) RETURNING *',
-    [ids]
-  );
-  return result.rows;
+  try {
+    if (!ids || ids.length === 0) return [];
+    
+    // First fetch the rules to return them
+    const rulesToDelete = await prisma.firewallRule.findMany({
+      where: { id: { in: ids } }
+    });
+    
+    // Then delete them
+    await prisma.firewallRule.deleteMany({
+      where: { id: { in: ids } }
+    });
+    
+    return rulesToDelete;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // --------------------
 // Toggle activation
 // --------------------
 export const toggleRules = async (ids: number[], active: boolean): Promise<Rule[]> => {
-  const updated: Rule[] = [];
-  for (const id of ids) {
-    const res = await pool.query<Rule>(
-      'UPDATE firewall_rules SET active=$1 WHERE id=$2 RETURNING *',
-      [active, id]
-    );
-    if (res.rows.length > 0) updated.push(...res.rows);
+  try {
+    const updated: Rule[] = [];
+    for (const id of ids) {
+      const updatedRule = await prisma.firewallRule.update({
+        where: { id },
+        data: { active }
+      });
+      updated.push(updatedRule);
+    }
+    return updated;
+  } catch (error) {
+    throw error;
   }
-  return updated;
 };

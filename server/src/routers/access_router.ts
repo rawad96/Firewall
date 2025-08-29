@@ -22,12 +22,12 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
       user: {
         id: userData.id,
         email: userData.email,
-        fullName: userData.full_name,
+        fullName: userData.fullName,
         phone: userData.phone,
         role: userData.role,
-        is_active: userData.is_active,
-        created_at: userData.created_at,
-        updated_at: userData.updated_at
+        isActive: userData.isActive,
+        createdAt: userData.createdAt,
+        updatedAt: userData.updatedAt
       }
     });
   } catch (error) {

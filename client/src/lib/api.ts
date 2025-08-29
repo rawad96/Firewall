@@ -20,9 +20,9 @@ export interface RegisterResponse {
   id: number;
   email: string;
   role: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type RuleType = 'ip' | 'url' | 'port';

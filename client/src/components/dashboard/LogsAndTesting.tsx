@@ -19,6 +19,7 @@ const AVAILABLE_TESTS = [
   { id: "rules_delete", name: "Delete Test Rule", description: "Test DELETE /api/firewall/ip endpoint" },
   { id: "users_get", name: "Get All Users", description: "Test GET /users endpoint" },
   { id: "users_post", name: "Create Test User", description: "Test POST /users endpoint" },
+  { id: "users_get_by_id", name: "Get User By ID", description: "Test GET /users/{id} endpoint" },
   { id: "users_delete", name: "Delete Test User", description: "Test DELETE /users/{id} endpoint" },
   { id: "auth_test", name: "Authentication Test", description: "Test JWT token validation" }
 ];
@@ -127,6 +128,8 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
             body: JSON.stringify({
               email: `test-${Date.now()}@example.com`,
               password: "testpassword123",
+              full_name:"Test User",
+              phone:"0000000000",
               role: "user"
             })
           });
@@ -138,6 +141,14 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
           } else {
             message = `Failed: ${createUserResponse.statusText}`;
           }
+          break;
+
+          case "users_get_by_id":
+          const userByIdResponse = await fetch(`${API_BASE}/users/${createdUserId}`, {
+            headers: getAuthHeaders()
+          });
+          success = userByIdResponse.ok;
+          message = success ? `Retrieved user: ${JSON.stringify(await userByIdResponse.json())}` : `Failed: ${userByIdResponse.statusText}`;
           break;
 
           case "users_delete":
@@ -156,7 +167,7 @@ export default function LogsAndTesting({ isAdmin }: { isAdmin: boolean }) {
                 message = "No test user found to delete - run Create Test User first";
               } else {
                 success = false;
-                message = `Failed: ${deleteUserResponse.status} ${deleteUserResponse.statusText}`;
+                message = `Failed: ${deleteUserResponse.status} ${deleteUserResponse.statusText} - run Create Test User first`;
               }
             } catch (err) {
               success = false;

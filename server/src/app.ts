@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import pool from "./config/db";
+import prisma from "./config/db";
 import createTable from "./tables/db_table";
 import rulesRouter from './routers/rules';
 import authRouter from './routers/auth_router';
@@ -26,8 +26,8 @@ app.use(express.json());
 
 async function startServer() {
   try {
-    await pool.query("SELECT NOW()");
-    console.log("✅ Connected to PostgreSQL");
+    await prisma.$connect();
+    console.log("✅ Connected to PostgreSQL via Prisma");
 
     createTable();
 

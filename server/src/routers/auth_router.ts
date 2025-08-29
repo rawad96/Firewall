@@ -26,8 +26,8 @@ router.post('/login', async (req: Request, res: Response) => {
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   try {
     const user = await getUserByEmailWithHash(email);
-    if (!user || !user.password_hash) return res.status(401).json({ error: 'Invalid credentials' });
-    const ok = await bcrypt.compare(password, user.password_hash);
+    if (!user || !user.passwordHash) return res.status(401).json({ error: 'Invalid credentials' });
+    const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
     const token = signToken({ sub: user.id!, email: user.email, role: user.role || 'user' });
     return res.json({ token });
